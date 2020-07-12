@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Config
+clusters: 
+- cluster:
+    certificate-authority: /root/Kubernetes_keys/ca.crt 
+    server: 192.168.99.100:8443
+  name: Clustername
+users: 
+- user: 
+    client-certificate: /root/Kubernetes_keys/client.crt
+    client-key: /root/Kubernetes_keys/client.key
+  name: User1
+
+contexts:
+- context: 
+    cluster: Clustername
+    user: User1
+  name: Context1
+    
