@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata: 
+  name: wordpress-rs
+
+spec: 
+  replicas: 3
+  selector:
+    matchLabels:
+      app: wordpress
+      time : prac
+  template: 
+    metadata: 
+      name: wordpress-pod
+      labels: 
+        app: wordpress
+        time: prac   
+    spec:
+      containers:
+      - name: con1
+        image: wordpress
+      

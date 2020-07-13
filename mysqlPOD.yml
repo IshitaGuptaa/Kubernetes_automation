@@ -3,18 +3,18 @@ kind: Pod
 metadata: 
   name: mysqlpod
   labels: 
-    con:India
-    app:db
+    con: India
+    app: db
 spec:
   containers: 
-  - name: MySql
-    images: mysql
+  - name: mysql1
+    image: mysql
     env: 
-      -name: MYSQL_ROOT_PASSWORD
-       value: redhat
-      -name: MYSQL_DATABASE
-       value: mysql1
-      -name: MYSQL_USER
-       value: Ishita
-      -name: MYSQL_PASSWORD
-       value: redhat
+      - name: MYSQL_ROOT_PASSWORD
+        value: redhat
+      - name: MYSQL_DATABASE
+        value: mysql1
+      - name: MYSQL_USER
+        value: Ishita
+      - name: MYSQL_PASSWORD
+        value: redhat
