@@ -1,1 +1,0 @@
-echo -n redhat | base64   ----- To find the encoded value of redhat 
