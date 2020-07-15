@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Pod
+metadata:
+ name: pvcpod 
+ labels:
+   why: pvc
+   con: IN
+   dom: prac
+spec:
+  containers: 
+  - name: conpvc
+    image: mysql
+    env: 
+      - name: MYSQL_ROOT_PASSWORD
+        value: redhat
+      - name: MYSQL_DATABASE
+        value: mysql1
+      - name: MYSQL_USER
+        value: Ishita
+      - name: MYSQL_PASSWORD
+        value: redhat
+    volumeMounts: 
+      - name: vol1
+        mountPath: /var/lib/mysql
+  volumes:
+    - name: vol1
+      persistentVolumeClaim: 
+        claimName: mypvc1

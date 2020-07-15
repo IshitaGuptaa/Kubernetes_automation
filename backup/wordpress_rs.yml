@@ -1,25 +1,9 @@
-apiVersion: v1
-kind: Service
-metadata: 
-  name: serviceword
-spec:
-  selector:
-    app: wordpress
-  type: LoadBalancer
-  ports: 
-   - port: 80
-     nodePort: 30008
-        
----
-
 apiVersion: apps/v1
-kind: Deployment
+kind: ReplicaSet
 metadata: 
-  name: wordpress-dp
+  name: wordpress-rs
 
 spec: 
-  strategy:
-    type: Recreate
   replicas: 1
   selector:
     matchLabels:
@@ -37,7 +21,10 @@ spec:
         image: wordpress
         env: 
         - name: WORDPRESS_DB_HOST
-          value: mysql-dp
+          valueFrom:
+            secretKeyRef:
+               name: wordsecret
+               key: host
         - name: WORDPRESS_DB_USER
           valueFrom:  
             secretKeyRef:
@@ -57,5 +44,3 @@ spec:
         ports: 
         - name: wordpress
           containerPort: 80
-
-
