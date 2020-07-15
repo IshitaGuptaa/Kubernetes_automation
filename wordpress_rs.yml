@@ -19,4 +19,28 @@ spec:
       containers:
       - name: con1
         image: wordpress
-      
+        env: 
+        - name: WORDPRESS_DB_HOST
+          valueFrom:
+            secretKeyRef:
+               name: wordsecret
+               key: host
+        - name: WORDPRESS_DB_USER
+          valueFrom:  
+            secretKeyRef:
+               name: secretdb
+               key: username
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom: 
+            secretKeyRef: 
+               name: secretdb
+               key: password
+        - name: WORDPRESS_DB_NAME
+          value: mysql1  
+        - name: WORDPRESS_TABLE_PREFIX
+          value: db_info
+        - name: WORDPRESS_DEBUG
+          value: "1"
+        ports: 
+        - name: wordpress
+          containerPort: 80
