@@ -1,0 +1,122 @@
+Steps
+
+STEP 1) Create VMs for cluster and 2cpu cores recommended
+
+STEP 2) Create Repo and install docker-ce 
+
+    command - yum install docker-ce --nobest
+
+STEP 3) Install Kubelet 
+
+
+   command 1:
+   
+cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-\$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+exclude=kubelet kubeadm kubectl
+EOF
+
+    command 2:
+
+	# Set SELinux in permissive mode (effectively disabling it)
+ 	setenforce 0
+	sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+
+    command 3:
+	
+	yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+
+    command 4: 
+
+	sudo systemctl enable --now kubelet		
+    
+    command 5:
+        
+        kubelet --version (to check version)
+
+
+
+STEP4) 
+
+   command 1:       
+             
+      curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+ 
+
+   command 2: 
+
+      chmod +x ./kubectl
+
+   command 3: 
+
+      mv ./kubectl /usr/local/bin/kubectl
+
+   command 4:
+      kubectl version 
+
+
+STEP 5)
+   
+    commands 1:   
+	
+	Add the below lines in 
+	
+	- vi /etc/docker/daemon.json 
+
+ 	{
+  "exec-opts": ["native.cgroupdriver=systemd"]
+   }
+
+     command 2: 
+
+	systemctl restart docker
+
+
+
+STEP 6) Disable swap
+
+    command 1:
+        vi /etc/fstab, remove last line /dev/mapper/rhel-swap.........
+  
+STEP 7) iproute-tc
+
+    command 1:
+        use Ip route-tc to control traffic
+	- yum install wget
+        - wget https://yum.oracle.com/repo/OracleLinux/OL7/UEKR5/x86_64/getPackage/iproute-tc-5.4.0-1.0.1.el7.x86_64.rpm
+
+	iproute-tc installed
+ 
+    
+    command 2: 
+        Now to use iproute-tc, we need to make some changes in iptables
+ 	if in  "sysctl -a | grep iptables" command ,
+       "net.bridge.bridge-nf-call-iptables=0" , we need to make it 1 . 
+        
+    command 3:
+      echo 'net.bridge.bridge-nf-call-iptables=1' | sudo tee -a /etc/sysctl.conf
+
+    command 4: sysctl --system
+
+
+
+STEP 8: Check if kubectl and docker are working
+
+    command: systemctl status kubelet
+    command: systemctl status docker 
+
+
+
+
+
+-------THE WORK DONE SO FAR WAS COMMON TO ALL NODES AND MASTER OF CLUSTER-------
+
+
+    
