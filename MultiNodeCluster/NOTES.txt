@@ -119,4 +119,106 @@ STEP 8: Check if kubectl and docker are working
 -------THE WORK DONE SO FAR WAS COMMON TO ALL NODES AND MASTER OF CLUSTER-------
 
 
+
+Step 9 :
+
+ Make etc/hosts files and scp to all other systems
+
+Step 10:   MASTER NODE ALL STEPS
+  Start kubeadm 
+
+   command 1: sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --ignore-preflight-errors=all    (DO NOT CHNAGE THE NETWORK MASK, AS IT SHOUD BE SAME AS WHAT MENIONED IN FLANNEL.YML) 
+ 
+
+(IF YOU WANT TO RESET KUBEADM use "kubeadm reset" and delete (not always)         /var/lib/etcd folder. Then you can use kubeadm init  or
+otherthing we can do "yum remove kubelet kubeadm kubectl" follwowed by "yum autoremove" in client nodes. and then reinstall in the same way 
+
+
+kubeadm reset -f
+rm -rf /etc/cni /etc/kubernetes /var/lib/dockershim /var/lib/etcd /var/lib/kubelet /var/run/kubernetes ~/.kube/*
+iptables -F && iptables -X
+iptables -t nat -F && iptables -t nat -X
+iptables -t raw -F && iptables -t raw -X
+iptables -t mangle -F && iptables -t mangle -X
+systemctl restart docker
+
+
+
+sudo systemctl enable docker
+sudo systemctl enable kubelet
+systemctl daemon-reload
+systemctl restart docker
+systemctl restart kubelet
+
+rm -f /etc/kubernetes/kubelet.conf  /etc/kubernetes/pki/ca.crt (CLIENT ONLY)
+netstat -tnlp | grep 10250  (CLIENT ONLY)
+then kill the process id 
+
+IF WE FOLLOW THE LAST 10 LINES WE DO NAT HAVE TO DO ANYTHING ELSE 
+
+
+) 
+
+   
+   command 2: Setup given in the end of init
+  	 
+	
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+
+
+
+
+
+
+
+ Save the TOKEN CLI in a file, so you can use it later 
     
+  echo kubeadm join 192.168.0.108:6443 --token suwj4d.ah56q756qnkmd3hg     --discovery-token-ca-cert-hash sha256:0dc1fa784555533fc00246ec6fdb1f5949c01f34bbac0987239442eb48e0d038 2>&1 | tee  KubeadmJoinCred.txt 
+
+
+    
+   command 3: Paste the following command on all slaves to add them in cluster oor to master
+
+    kubeadm join 192.168.0.108:6443 --token suwj4d.ah56q756qnkmd3hg     --discovery-token-ca-cert-hash sha256:0dc1fa784555533fc00246ec6fdb1f5949c01f34bbac0987239442eb48e0d038 
+
+
+   command 4: "Kubectl get nodes" (MASTER, for slaves we need to setup kubectl config  once)
+
+
+
+
+Say if we want to restup the node then , we need to remove 3 parts , 1) Delete file named "/etc/kubernetes/kubelet.conf"  2) Delete file named  "/etc/kubernetes/pki/ca.crt" 3) remove the port 10250 (that is used for connection ). 
+
+For removing port 1) yum intall net-tools 2) netstat -tnlp | grep 10250   3) and then kill the process id
+
+and apply the kubeadm join again
+
+
+
+------------------------------------------CLUSTER MADE BUT NODES NOT READY----------------------------------------------------------
+
+
+STEP 11:
+
+   We will see that our cluster is ready but "kubectl get nodes" shows that the nodes are are not ready, that is because they do not have any network connectivity, for them we will have to setup overlay network connectivity and for this CNI (conatiner network interface) we will use FLANNEL. the link of which is visible on internet (We need overlay network because the pods have connectivity in same node but not with the pods of other nodes, so we use overlay network for the connectivity)
+
+    command: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+STEP 12: 
+   
+  command : "kubectl get pods (or pod or po) -n kube-system"(Note Kube-system is the namespace where all core k8s services lies, as we apply flannel yml, we will create flannel deamons than will help us create core-dns pods, one they are formed, you will se all the nodes are uup and running (kubectl et nodes)) 
+
+
+
+----------------------------------------------MULTI-NODE KUBERNETES CLUSTER MADE --------------------------------------------------
+
+
+Now everything is as same as minikube, just configure the /$HOME/.kube/config and we are good to go.
+
+
+1) we can replace the cofing file, or
+2) we can put this config file as configMultiNode & for any command use it like this "kubectl get pods --kube-config configMultiNode"    
+3) We can put both the config file and edit which user will use which cluster and by default which config file we triggered
